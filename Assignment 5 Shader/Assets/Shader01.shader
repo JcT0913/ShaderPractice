@@ -21,6 +21,8 @@ Shader "Unlit/Shader01"
 
             #include "UnityCG.cginc"
 
+            #define TAU 6.28318530
+
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -49,11 +51,11 @@ Shader "Unlit/Shader01"
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 
-                //o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
 
                 //o.normal = UnityObjectToWorldNormal(v.normals);
-                o.uv = v.uv;
+                //o.uv = v.uv;
                 
                 return o;
             }
@@ -61,13 +63,18 @@ Shader "Unlit/Shader01"
             fixed4 frag (v2f i) : SV_Target
             {
                 // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
+                //fixed4 col = tex2D(_MainTex, i.uv);
                 // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
+                //UNITY_APPLY_FOG(i.fogCoord, col);
                 //return col;
 
-                float4 outputColor = lerp(_ColorA, _ColorB, i.uv.x);
-                return outputColor;
+                float xOffset = cos(i.uv.x * TAU * 8) * 0.01;
+
+                float t = (cos((i.uv.y + xOffset + _Time.y / 3) * TAU * 5) + 1) * 0.5;
+                return float4(t, 1, 1, 0.5);
+
+                //float4 outputColor = lerp(_ColorA, _ColorB, i.uv.x);
+                //return outputColor;
             }
             ENDCG
         }
