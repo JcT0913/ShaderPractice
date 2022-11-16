@@ -3,7 +3,8 @@ Shader "Unlit/Shader01"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Color ("Color", Color) = (1, 1, 1, 1)
+        _ColorA ("ColorA", Color) = (1, 1, 1, 1)
+        _ColorB ("ColorB", Color) = (1, 1, 1, 1)
     }
     SubShader
     {
@@ -23,8 +24,9 @@ Shader "Unlit/Shader01"
             struct appdata
             {
                 float4 vertex : POSITION;
-                //float3 normals: NORMAL;
                 float2 uv : TEXCOORD0;
+
+                //float3 normals: NORMAL;
             };
 
             struct v2f
@@ -32,18 +34,27 @@ Shader "Unlit/Shader01"
                 float2 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
+
+                //float3 normal : TEXCOORD1;
             };
 
             sampler2D _MainTex;
-            float4 _Color;
             float4 _MainTex_ST;
+
+            float4 _ColorA;
+            float4 _ColorB;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                
+                //o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 UNITY_TRANSFER_FOG(o,o.vertex);
+
+                //o.normal = UnityObjectToWorldNormal(v.normals);
+                o.uv = v.uv;
+                
                 return o;
             }
 
@@ -53,9 +64,10 @@ Shader "Unlit/Shader01"
                 fixed4 col = tex2D(_MainTex, i.uv);
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
-                
                 //return col;
-                return _Color;
+
+                float4 outputColor = lerp(_ColorA, _ColorB, i.uv.x);
+                return outputColor;
             }
             ENDCG
         }
